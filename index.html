@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Folio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="burnCanvas"></canvas>
+<div class="lbg" id="lbg"></div>
+
+<div id="as">
+  <div class="aw">
+    <div class="al">&#127810; Folio</div>
+    <div class="as2">your private journal</div>
+    <div id="pkr" style="width:100%">
+      <div class="pg" id="pgrid"></div>
+      <div class="adiv"></div>
+      <div style="text-align:center;font-size:.78rem;color:var(--faint)">All data stored locally on this device.</div>
+    </div>
+    <div class="lp" id="lpanel">
+      <button class="lb" onclick="showPicker()">&#8592; Back</button>
+      <div class="lav2" id="lav"></div>
+      <div class="ln" id="lname"></div>
+      <div class="liw"><input type="password" id="lpw" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="em" id="lerr"></div>
+      <button class="btn bp bf" onclick="doLogin()" style="margin-top:4px">Enter Journal</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <header class="tb">
+    <div class="tbl"><span class="wm">&#127810; Folio</span><span class="tg">your private journal</span></div>
+    <div class="tba">
+      <span class="sind" id="si1"></span>
+      <button class="btn bg bs" id="tbtn" onclick="toggleTheme()" style="font-size:1.05rem;padding:6px 10px">&#127769;</button>
+      <button class="btn bg bs" onclick="openM('mImpFmt')">&#8679; Import</button>
+      <button class="btn bg bs" onclick="if(!E.length){toast('No entries to export.',true)}else{openM('mExpFmt')}">&#8681; Export</button>
+      <button class="btn bp bs" onclick="newEntry()">&#xFF0B; New Entry</button>
+      <button class="btn bv bs" onclick="openVentSheet()" title="Vent Mode — self-destructs">&#128293; Vent</button>
+      <div class="streak-pill" id="streakPill" onclick="toggleStreakTip()"><span class="streak-flame">&#128293;</span><span class="streak-num" id="streakNum">0</span><span class="streak-label">day streak</span><div class="streak-tip" id="streakTip"></div></div><div class="up" id="upill" onclick="toggleDrop()">
+        <div class="upav" id="pilav"></div>
+        <span class="upn" id="piln"></span>
+        <span style="color:var(--faint);font-size:.7rem;transition:none">&#9662;</span>
+        <div class="udrop" id="udrop">
+          <div class="ddh"><div class="ddn" id="ddn"></div><div class="dds2" id="dds"></div></div>
+          <div class="ddsep"></div>
+          <button class="dd-item" onclick="openCPw()">&#128273; Change Password</button>
+          <button class="dd-item" onclick="switchAccount()">&#128100; Switch Account</button>
+          <div class="ddsep"></div>
+          <button class="dd-item danger" onclick="openDelA()">&#128465; Delete Account</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <aside class="sb" id="sidebar">
+    <div class="sb-inner" id="sb-inner">
+      <div class="sbh">
+        <button class="sb-toggle" onclick="toggleSidebar()" title="Collapse sidebar">&#9776;</button>
+        <div class="sw" style="flex:1"><span class="si">&#128269;</span><input type="text" id="sin" placeholder="Search entries&#8230;" oninput="renderList()"/></div>
+      </div>
+      <div class="el" id="elist"></div>
+    </div>
+  </aside>
+  <button class="sb-open-btn" id="sb-open-btn" onclick="toggleSidebar()" title="Open sidebar">&#9776;</button>
+  <main class="ep">
+    <div class="wel" id="wel"><div class="bl">&#127809;</div><h2>Begin your story.</h2><p>Every leaf falls in its own time. Press <strong>New Entry</strong> to start writing.</p></div>
+    <div id="ed" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="etb" id="etb">
+        <!-- Format -->
+        <button class="tb-btn" id="btn-bold" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+        <button class="tb-btn" id="btn-italic" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+        <button class="tb-btn" id="btn-underline" onclick="fmt('underline')" title="Underline" style="text-decoration:underline">U</button>
+        <button class="tb-btn" id="btn-strike" onclick="fmt('strikeThrough')" title="Strikethrough" style="text-decoration:line-through">S</button>
+        <div class="tbs"></div>
+        <!-- Block -->
+        <button class="tb-btn" onclick="fmtBlock('h1')" title="Heading 1" style="font-size:.78rem;font-weight:700;letter-spacing:-.01em">H1</button>
+        <button class="tb-btn" onclick="fmtBlock('h2')" title="Heading 2" style="font-size:.78rem;font-weight:700;letter-spacing:-.01em">H2</button>
+        <div class="tb-pop-wrap">
+          <button class="tb-btn" onclick="togglePop('pop-size')" title="Font size" style="font-size:.78rem;min-width:32px;justify-content:center;font-weight:600" id="btn-size">16px</button>
+          <div class="tb-pop" id="pop-size">
+            <div class="pop-label" style="margin-bottom:10px">Font Size</div>
+            <div class="sz-top-row">
+              <input type="range" class="sz-slider" id="sz-slider" min="8" max="72" value="16"
+                oninput="szSliderMove(this.value)"
+                onchange="szSliderCommit(this.value)"
+                onmousedown="saveSelection()" />
+              <input type="number" class="sz-input" id="sz-input" min="8" max="72" value="16"
+                oninput="szInputChange(this.value)"
+                onkeydown="if(event.key==='Enter'){szCommit(parseInt(this.value));closeAllPops();}" />
+              <span class="sz-unit">px</span>
+            </div>
+            <div class="sz-presets">
+              <span class="sz-preset" onclick="setSzPreset(11)">11</span>
+              <span class="sz-preset" onclick="setSzPreset(13)">13</span>
+              <span class="sz-preset active" onclick="setSzPreset(16)">16</span>
+              <span class="sz-preset" onclick="setSzPreset(20)">20</span>
+              <span class="sz-preset" onclick="setSzPreset(24)">24</span>
+              <span class="sz-preset" onclick="setSzPreset(32)">32</span>
+              <span class="sz-preset" onclick="setSzPreset(48)">48</span>
+            </div>
+          </div>
+        </div>
+        <div class="tb-pop-wrap" id="fp-wrap">
+          <button class="tb-btn" onclick="toggleFontPanel()" title="Font family" id="btn-font" style="font-size:.78rem;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">Aa</button>
+          <div id="font-panel">
+            <div class="fp-head">
+              <span class="fp-head-label">&#128295; Font Family</span>
+            </div>
+            <div class="fp-search"><span class="fp-search-icon">&#128269;</span><input type="text" id="fp-search" placeholder="Search fonts&#8230;" oninput="filterFonts(this.value)" /></div>
+            <div class="fp-list" id="fp-list"><div class="fp-empty">Loading fonts&#8230;</div></div>
+          </div>
+        </div>
+        <button class="tb-btn" onclick="fmtBlock('blockquote')" title="Quote" style="font-size:1rem">&ldquo;</button>
+        <button class="tb-btn" onclick="fmt('insertUnorderedList')" title="Bullet list" style="font-size:.95rem">&#8226;&#8212;</button>
+        <button class="tb-btn" onclick="fmt('insertOrderedList')" title="Numbered list" style="font-size:.82rem">1.</button>
+        <div class="tbs"></div>
+        <!-- Text color -->
+        <div class="tb-pop-wrap">
+          <button class="tb-btn" id="btn-color" onclick="togglePop('pop-color')" title="Text color">
+            <span style="display:flex;flex-direction:column;align-items:center;gap:2px">
+              <span style="font-weight:700;font-size:.88rem;line-height:1">A</span>
+              <span id="color-bar" style="width:14px;height:3px;border-radius:2px;background:var(--orange);transition:background .15s"></span>
+            </span>
+          </button>
+          <div class="tb-pop" id="pop-color"></div>
+        </div>
+        <!-- Highlight -->
+        <div class="tb-pop-wrap">
+          <button class="tb-btn" id="btn-highlight" onclick="togglePop('pop-highlight')" title="Highlight">
+            <span style="display:flex;flex-direction:column;align-items:center;gap:2px">
+              <span style="font-size:.88rem;line-height:1">&#9638;</span>
+              <span id="hl-bar" style="width:14px;height:3px;border-radius:2px;background:#f5e642;transition:background .15s"></span>
+            </span>
+          </button>
+          <div class="tb-pop" id="pop-highlight"></div>
+        </div>
+        <!-- Moods -->
+        <button class="tb-btn" onclick="mood('&#128522;')">&#128522;</button>
+        <button class="tb-btn" onclick="mood('&#128532;')">&#128532;</button>
+        <button class="tb-btn" onclick="mood('&#128545;')">&#128545;</button>
+        <button class="tb-btn" onclick="mood('&#127775;')">&#127775;</button>
+        <button class="tb-btn" onclick="mood('&#127810;')">&#127810;</button>
+        <div class="tbs"></div>
+        <button class="tb-btn" onclick="showPromptCard()" title="Writing prompt" style="color:var(--gold)">&#10024; Prompt</button>
+        <div class="tbs"></div>
+<div class="tb-pop-wrap">
+          <button class="tb-btn" onclick="togglePop('pop-page')" title="Page style" id="btn-page" style="padding:5px 9px"><span class="btn-page-inner"><span class="btn-page-icon" id="btn-page-icon">&#128196;</span><span class="btn-page-lbl" id="btn-page-lbl">Fresh</span></span></button>
+          <div class="tb-pop" id="pop-page">
+            <div class="pop-label">Page Style</div>
+            <div class="pg-opts">
+              <div class="pg-opt sel" id="pg-fresh" onclick="setPageStyle('fresh')"><div class="pg-thumb"></div><div class="pg-opt-label">Fresh</div></div>
+              <div class="pg-opt" id="pg-ruled" onclick="setPageStyle('ruled')"><div class="pg-thumb pg-thumb-ruled"></div><div class="pg-opt-label">Ruled</div></div>
+              <div class="pg-opt" id="pg-dotted" onclick="setPageStyle('dotted')"><div class="pg-thumb pg-thumb-dotted"></div><div class="pg-opt-label">Dotted</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="tbs"></div>
+        <span class="wc" id="wc">0 words</span>
+        <span class="sind" id="si2"></span>
+      </div>
+
+      <div class="mood-row" id="moodRow"><span class="mood-label">mood</span><button class="mood-btn" data-mood="😊" onclick="pickMood('😊')" title="happy">😊</button><button class="mood-btn" data-mood="😌" onclick="pickMood('😌')" title="calm">😌</button><button class="mood-btn" data-mood="😔" onclick="pickMood('😔')" title="sad">😔</button><button class="mood-btn" data-mood="😤" onclick="pickMood('😤')" title="frustrated">😤</button><button class="mood-btn" data-mood="😰" onclick="pickMood('😰')" title="anxious">😰</button><button class="mood-btn" data-mood="🤩" onclick="pickMood('🤩')" title="excited">🤩</button><button class="mood-btn" data-mood="😴" onclick="pickMood('😴')" title="tired">😴</button><button class="mood-btn" data-mood="🥰" onclick="pickMood('🥰')" title="grateful">🥰</button><button class="mood-btn" data-mood="🔥" onclick="pickMood('🔥')" title="motivated">🔥</button><button class="mood-btn" data-mood="🌧️" onclick="pickMood('🌧️')" title="melancholy">🌧️</button></div>
+      <div class="etw"><div class="edt" id="edate"></div><input id="eTitle" type="text" placeholder="Entry title&#8230;" oninput="onEdit()"/></div>
+      <div class="ebw" onclick="document.getElementById('eBody').focus()"><div id="eBody" contenteditable="true" data-placeholder="What's on your mind today…" oninput="onEdit()"></div></div>
+    </div>
+    <div class="pcard" id="pcard">
+      <div class="pcard-header">
+        <div class="pcard-label">&#10024; writing prompt</div>
+        <button class="pcard-close" onclick="dismissPrompt()">&#10005;</button>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-text" id="pcard-text"></div>
+        <div class="pcard-actions">
+          <button class="btn bp bs" onclick="usePrompt()">Use this</button>
+          <button class="btn bg bs" onclick="nextPrompt()">&#8635; Another</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="mbd" id="mCreate">
+  <div class="modal">
+    <h3>&#127809; Create Account</h3><p>Your account lives entirely on this device.</p>
+    <div class="fg"><label>Display Name</label><input type="text" id="cNm" placeholder="e.g. Alex" maxlength="24"/></div>
+    <div class="fg"><label>Pick an Avatar</label><div class="ag" id="avGrid"></div></div>
+    <div class="fg"><label>Password</label><input type="password" id="cPw" placeholder="At least 6 characters"/></div>
+    <div class="fg"><label>Confirm Password</label><input type="password" id="cPw2" placeholder="Repeat password"/></div>
+    <div class="em" id="cErr"></div>
+    <div class="ma"><button class="btn bg" onclick="closeM('mCreate')">Cancel</button><button class="btn bp" onclick="doCreate()">Create Account</button></div>
+  </div>
+</div>
+<div class="mbd" id="mCPw">
+  <div class="modal">
+    <h3>&#128273; Change Password</h3><p>Enter your current password, then choose a new one.</p>
+    <div class="fg"><label>Current Password</label><input type="password" id="cpC" placeholder="Current password"/></div>
+    <div class="fg"><label>New Password</label><input type="password" id="cpN" placeholder="New password"/></div>
+    <div class="fg"><label>Confirm New Password</label><input type="password" id="cpN2" placeholder="Repeat new password"/></div>
+    <div class="em" id="cpErr"></div>
+    <div class="ma"><button class="btn bg" onclick="closeM('mCPw')">Cancel</button><button class="btn bp" onclick="doCPw()">Update Password</button></div>
+  </div>
+</div>
+<div class="mbd" id="mExp">
+  <div class="modal">
+    <h3>&#127810; Export Journal</h3><p>Entries encrypted with AES-256. File opens only in Folio.</p>
+    <div class="fg"><label>Passphrase</label><input type="password" id="exPw" placeholder="Enter a strong passphrase&#8230;"/></div>
+    <div class="fg"><label>Confirm Passphrase</label><input type="password" id="exPw2" placeholder="Confirm passphrase&#8230;"/></div>
+    <div class="em" id="exErr"></div>
+    <div class="ma"><button class="btn bg" onclick="closeM('mExp')">Cancel</button><button class="btn bp" onclick="doExport()">&#8681; Download</button></div>
+  </div>
+</div>
+<div class="mbd" id="mImp">
+  <div class="modal">
+    <h3>&#127809; Import Journal</h3><p>Select a .jrnl file and enter your passphrase.</p>
+    <div class="fg"><label>Journal File</label><input type="file" id="imF" accept=".jrnl"/></div>
+    <div class="fg"><label>Passphrase</label><input type="password" id="imPw" placeholder="Enter your passphrase&#8230;"/></div>
+    <div class="em" id="imErr"></div>
+    <div class="ma"><button class="btn bg" onclick="closeM('mImp')">Cancel</button><button class="btn bp" onclick="doImport()">&#8679; Import</button></div>
+  </div>
+</div>
+<div class="mbd" id="mDelA">
+  <div class="modal">
+    <h3>&#128465; Delete Account</h3><p>Permanently deletes account and <strong>all entries</strong>. Cannot be undone.</p>
+    <div class="fg"><label>Enter password to confirm</label><input type="password" id="daPw" placeholder="Password"/></div>
+    <div class="em" id="daErr"></div>
+    <div class="ma"><button class="btn bg" onclick="closeM('mDelA')">Cancel</button><button class="btn bp" style="background:var(--red);box-shadow:none" onclick="doDelA()">Delete Forever</button></div>
+  </div>
+</div>
+
+<!-- Export format picker -->
+<div class="mbd" id="mExpFmt">
+  <div class="modal">
+    <h3>&#8681; Export Journal</h3>
+    <p>Choose a format to export your entries.</p>
+    <div class="fmt-choices">
+      <div class="fmt-choice" onclick="closeM('mExpFmt');openExportEncrypted()">
+        <div class="fmt-choice-icon">&#128274;</div>
+        <div class="fmt-choice-title">Encrypted</div>
+        <div class="fmt-choice-desc">AES-256 .jrnl file. Only openable in Folio.</div>
+      </div>
+      <div class="fmt-choice" onclick="closeM('mExpFmt');openExportTxt()">
+        <div class="fmt-choice-icon">&#128196;</div>
+        <div class="fmt-choice-title">Plain Text</div>
+        <div class="fmt-choice-desc">Readable .txt file. All entries in one document.</div>
+      </div>
+    </div>
+    <div class="ma"><button class="btn bg" onclick="closeM('mExpFmt')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- Import format picker -->
+<div class="mbd" id="mImpFmt">
+  <div class="modal">
+    <h3>&#8679; Import Journal</h3>
+    <p>Choose the format of the file you want to import.</p>
+    <div class="fmt-choices">
+      <div class="fmt-choice" onclick="closeM('mImpFmt');openImportEncrypted()">
+        <div class="fmt-choice-icon">&#128274;</div>
+        <div class="fmt-choice-title">Encrypted</div>
+        <div class="fmt-choice-desc">A .jrnl file exported from Folio.</div>
+      </div>
+      <div class="fmt-choice" onclick="closeM('mImpFmt');openImportTxt()">
+        <div class="fmt-choice-icon">&#128196;</div>
+        <div class="fmt-choice-title">Plain Text</div>
+        <div class="fmt-choice-desc">A .txt file with entries separated by a blank line.</div>
+      </div>
+    </div>
+    <div class="ma"><button class="btn bg" onclick="closeM('mImpFmt')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- Export plain text (no extra fields needed, just confirm) -->
+<div class="mbd" id="mExpTxt">
+  <div class="modal">
+    <h3>&#128196; Export as Plain Text</h3>
+    <p>All your entries will be saved as a single readable .txt file. No password protection.</p>
+    <div class="fg">
+      <label>Include</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.88rem;color:var(--cream)">
+          <input type="checkbox" id="txtIncDate" checked style="width:auto;accent-color:var(--amber)"> Entry dates
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.88rem;color:var(--cream)">
+          <input type="checkbox" id="txtIncTitle" checked style="width:auto;accent-color:var(--amber)"> Entry titles
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.88rem;color:var(--cream)">
+          <input type="checkbox" id="txtSepLine" checked style="width:auto;accent-color:var(--amber)"> Separator lines between entries
+        </label>
+      </div>
+    </div>
+    <div class="ma"><button class="btn bg" onclick="closeM('mExpTxt')">Cancel</button><button class="btn bp" onclick="doExportTxt()">&#8681; Download .txt</button></div>
+  </div>
+</div>
+
+<!-- Import plain text -->
+<div class="mbd" id="mImpTxt">
+  <div class="modal">
+    <h3>&#128196; Import Plain Text</h3>
+    <p>Select a .txt file. Each entry should be separated by a blank line. The first non-empty line of each block becomes the title.</p>
+    <div class="fg"><label>Text File</label><input type="file" id="imTxtF" accept=".txt,.md" /></div>
+    <div class="em" id="imTxtErr"></div>
+    <div class="ma"><button class="btn bg" onclick="closeM('mImpTxt')">Cancel</button><button class="btn bp" onclick="doImportTxt()">&#8679; Import</button></div>
+  </div>
+</div>
+
+<div class="tw" id="tw"></div>
+
+<div id="day-tip"></div>
+<script src="script.js"></script>
+
+
+<!-- Vent Duration Sheet -->
+<div id="ventSheet" style="display:none;position:fixed;inset:0;z-index:400;align-items:flex-end;justify-content:center"><div class="vsh-bg" style="position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px)"></div><div class="vsh-inner" style="position:relative;z-index:1;width:100%;display:flex;justify-content:center">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:22px 22px 0 0;width:100%;max-width:460px;padding:22px 22px 36px">
+    <div style="width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 18px"></div>
+    <div style="font-size:.95rem;font-weight:700;color:var(--cream);margin-bottom:6px;display:flex;align-items:center;gap:8px"><span>🔥</span> Vent Mode</div>
+    <div style="font-size:.8rem;color:var(--faint);margin-bottom:18px;line-height:1.55">A private space to release your thoughts. Everything self-destructs when the timer ends — no entry saved, no record kept.</div>
+    <div id="vDurGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
+      <div class="vdopt" data-sec="300"  onclick="vSelDur(300)"  style="background:var(--surface);border:2px solid var(--bs);border-radius:12px;padding:13px 8px;cursor:pointer;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:var(--cream)">5</div><div style="font-size:.7rem;color:var(--faint)">min</div></div>
+      <div class="vdopt" data-sec="600"  onclick="vSelDur(600)"  style="background:var(--surface);border:2px solid var(--bs);border-radius:12px;padding:13px 8px;cursor:pointer;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:var(--cream)">10</div><div style="font-size:.7rem;color:var(--faint)">min</div></div>
+      <div class="vdopt" data-sec="900"  onclick="vSelDur(900)"  style="background:var(--surface);border:2px solid var(--bs);border-radius:12px;padding:13px 8px;cursor:pointer;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:var(--cream)">15</div><div style="font-size:.7rem;color:var(--faint)">min</div></div>
+      <div class="vdopt" data-sec="1800" onclick="vSelDur(1800)" style="background:var(--surface);border:2px solid var(--bs);border-radius:12px;padding:13px 8px;cursor:pointer;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:var(--cream)">30</div><div style="font-size:.7rem;color:var(--faint)">min</div></div>
+      <div class="vdopt" data-sec="3600" onclick="vSelDur(3600)" style="background:var(--surface);border:2px solid var(--bs);border-radius:12px;padding:13px 8px;cursor:pointer;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:var(--cream)">1</div><div style="font-size:.7rem;color:var(--faint)">hr</div></div>
+      <div class="vdopt sel" data-sec="86400" onclick="vSelDur(86400)" style="background:rgba(160,40,10,.18);border:2px solid #c03020;border-radius:12px;padding:13px 8px;cursor:pointer;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:var(--cream)">24</div><div style="font-size:.7rem;color:var(--faint)">hr</div></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="vCloseSheet()" style="flex:1;background:var(--surface);border:1px solid var(--bs);border-radius:10px;padding:10px;cursor:pointer;color:var(--muted);font-family:var(--font);font-size:.88rem">Cancel</button>
+      <button onclick="vStart()" class="vgo-btn" style="flex:2;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;background:linear-gradient(135deg,#8a1a0a,#c02808);color:#ffd0b0;font-family:var(--font);font-size:.9rem;font-weight:600;box-shadow:0 4px 16px rgba(160,30,10,.4)">🔥 Start venting</button>
+    </div>
+  </div>
+</div>
+
+<!-- Vent Editor Page -->
+</div></div>
+<div id="ventPage" style="display:none;position:fixed;inset:0;z-index:300;flex-direction:column;background:radial-gradient(ellipse at 75% 5%,rgba(120,20,5,.4) 0%,transparent 55%),radial-gradient(ellipse at 15% 90%,rgba(90,10,5,.3) 0%,transparent 50%),var(--bg)">
+  <!-- Topbar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px 0 24px;height:56px;flex-shrink:0;background:rgba(60,5,5,.5);border-bottom:1px solid rgba(180,40,20,.2);backdrop-filter:blur(12px)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button onclick="vClose()" style="background:none;border:1px solid rgba(180,50,20,.3);border-radius:8px;padding:5px 13px;color:#b06040;cursor:pointer;font-family:var(--font);font-size:.82rem">← Back</button>
+      <div style="display:flex;align-items:center;gap:6px;background:rgba(140,20,10,.2);border:1px solid rgba(180,50,20,.3);border-radius:20px;padding:4px 12px;font-size:.74rem;color:#b06040;letter-spacing:.07em;text-transform:uppercase">🔥 Vent Mode</div>
+    </div>
+    <div id="vTimer" style="font-size:.92rem;font-weight:700;color:#e07050;font-variant-numeric:tabular-nums;letter-spacing:.05em;background:rgba(160,30,10,.14);border:1px solid rgba(180,50,20,.28);border-radius:20px;padding:5px 15px;display:flex;align-items:center;gap:7px">
+      <span style="width:7px;height:7px;border-radius:50%;background:#c03020;display:inline-block;animation:vdot 1s ease-in-out infinite alternate"></span>
+      <span id="vTimerTxt">--:--</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="vWC" style="font-size:.78rem;color:#7a3828">0 words</span>
+      <button onclick="vBurn()" class="vburn-btn" style="background:linear-gradient(135deg,#6a1208,#a02010);border:none;border-radius:9px;padding:7px 15px;color:#ffc0a0;font-family:var(--font);font-size:.82rem;font-weight:600;cursor:pointer;box-shadow:0 3px 12px rgba(140,20,10,.4)">🔥 Burn &amp; close</button>
+    </div>
+  </div>
+  <!-- Editor body -->
+  <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column">
+    <div style="padding:34px 52px 0;flex-shrink:0">
+      <div id="vDate" style="font-size:.8rem;color:#c06040;margin-bottom:10px;letter-spacing:.05em"></div>
+      <input id="vTitle" type="text" placeholder="What's on your mind…" oninput="vSave()" autocomplete="off" spellcheck="true"
+        style="width:100%;background:none;border:none;outline:none;font-family:var(--font);font-size:2.1rem;color:#f0a080;line-height:1.2;border-bottom:2px solid rgba(180,50,20,.18);padding-bottom:10px;box-sizing:border-box"/>
+    </div>
+    <div id="vBody" contenteditable="true"
+      data-placeholder="Let it all out. No judgement. No record. Just you and the page…"
+      oninput="vSave();vWCUpdate()"
+      style="padding:20px 52px 60px;flex:1;min-height:300px;outline:none;font-family:var(--font);font-size:1.08rem;line-height:1.9;color:#d09080;white-space:pre-wrap;word-break:break-word"></div>
+  </div>
+</div>
+
+<style>
+#vBody:empty::before{content:attr(data-placeholder);color:rgba(140,60,40,.4);pointer-events:none}
+#vTitle::placeholder{color:rgba(160,60,40,.35)}
+.vdopt{transition:border-color .13s ease,background .13s ease}
+.vdopt:hover{border-color:rgba(180,50,20,.5)!important;background:rgba(160,40,10,.1)!important}
+.vdopt.sel{border-color:#c03020!important;background:rgba(160,40,10,.18)!important}
+@keyframes vdot{from{opacity:.3;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@keyframes vSheetIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+@keyframes vSheetOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(100%)}}
+@keyframes vPageIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+@keyframes vPageOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(60px)}}
+#ventSheet .vsh-inner{animation:vSheetIn .36s cubic-bezier(.34,1.2,.64,1)}
+#ventSheet.closing .vsh-inner{animation:vSheetOut .28s cubic-bezier(.4,0,1,1) forwards}
+#ventPage.opening{animation:vPageIn .38s cubic-bezier(.4,0,.2,1) forwards}
+#ventPage.closing{animation:vPageOut .28s cubic-bezier(.4,0,1,1) forwards}
+#ventSheet .vsh-bg{animation:fadein .28s ease}
+#ventSheet.closing .vsh-bg{animation:fadeout .28s ease forwards}
+@keyframes fadeout{from{opacity:1}to{opacity:0}}
+/* Burn overlay canvas */
+#burnCanvas{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s ease}
+#burnCanvas.active{opacity:1}
+@keyframes vGlow{
+  0%,100%{box-shadow:0 4px 16px rgba(160,30,10,.4),0 0 0 rgba(220,60,10,0)}
+  50%{box-shadow:0 6px 28px rgba(200,50,10,.7),0 0 32px rgba(220,80,10,.45),0 0 60px rgba(200,40,10,.2)}
+}
+@keyframes vShake{
+  0%,100%{transform:translateX(0) rotate(0deg)}
+  15%{transform:translateX(-3px) rotate(-1.5deg)}
+  30%{transform:translateX(3px) rotate(1.5deg)}
+  45%{transform:translateX(-2px) rotate(-1deg)}
+  60%{transform:translateX(2px) rotate(.8deg)}
+  75%{transform:translateX(-1px) rotate(-.4deg)}
+}
+.vgo-btn{transition:transform .15s ease,box-shadow .15s ease!important;animation:vGlow 2.4s ease-in-out infinite}
+.vgo-btn:hover{transform:translateY(-2px) scale(1.03)!important;animation:vGlow .9s ease-in-out infinite}
+.vgo-btn:active{transform:scale(.96)!important}
+.vburn-btn{transition:box-shadow .15s ease!important}
+.vburn-btn:hover{animation:vShake .45s ease-in-out;box-shadow:0 5px 22px rgba(180,30,10,.65)!important}
+@keyframes vburn{
+  0%  {opacity:1;filter:blur(0)    brightness(1)  sepia(0)}
+  30% {opacity:1;filter:blur(0)    brightness(1.4) sepia(.3)}
+  70% {opacity:.7;filter:blur(3px) brightness(2.5) sepia(.8)}
+  100%{opacity:0;filter:blur(14px) brightness(5)  sepia(1)}
+}
+#ventPage.burning>*{animation:vburn 1.4s ease-in forwards}
+</style>
+</body>
+</html>
