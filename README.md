@@ -48,9 +48,9 @@ Folio is a single-page application built with vanilla HTML, CSS, and JavaScript 
 
 1. Download the three files and place them in the same folder:
    ```
-   journal.html
-   journal.css
-   journal.js
+   index.html
+   style.css
+   script.js
    ```
 2. Open `journal.html` in any modern browser.
 3. Create an account with a display name and password.
@@ -64,9 +64,9 @@ That's it. No installation, no build step, no login server.
 
 ```
 folio/
-├── journal.html   — Structure and markup (~29 KB)
-├── journal.css    — All styles and animations (~32 KB)
-└── journal.js     — All application logic (~52 KB)
+├── index.html   — Structure and markup (~29 KB)
+├── style.css    — All styles and animations (~32 KB)
+└── script.js     — All application logic (~52 KB)
 ```
 
 All three files must stay in the same directory for relative path references to resolve.
