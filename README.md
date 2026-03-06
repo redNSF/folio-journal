@@ -52,7 +52,7 @@ Folio is a single-page application built with vanilla HTML, CSS, and JavaScript 
    style.css
    script.js
    ```
-2. Open `journal.html` in any modern browser.
+2. Open `index.html` in any modern browser.
 3. Create an account with a display name and password.
 4. Start writing.
 
