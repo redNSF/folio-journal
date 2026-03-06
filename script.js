@@ -1,4 +1,3 @@
-
 const LF=['&#127810;','&#127809;','&#127811;','&#127807;'];
 for(let i=0;i<18;i++){const l=document.createElement('div');l.className='leaf';l.innerHTML=LF[i%4];l.style.cssText='left:'+Math.random()*100+'vw;font-size:'+(0.9+Math.random()*1.2)+'rem;animation-duration:'+(14+Math.random()*20)+'s;animation-delay:'+(-Math.random()*30)+'s';document.getElementById('lbg').appendChild(l);}
 const AV=[{e:'&#129418;',b:'#3a1a08',g:'#e07830'},{e:'&#129417;',b:'#1a2010',g:'#60c060'},{e:'&#127812;',b:'#2a0a10',g:'#e84040'},{e:'&#127769;',b:'#0a1020',g:'#8090e0'},{e:'&#128059;',b:'#2a1808',g:'#c07840'},{e:'&#127809;',b:'#3a1008',g:'#e05020'},{e:'&#127807;',b:'#0a2018',g:'#40c890'},{e:'&#11088;',b:'#1a1808',g:'#f0d040'},{e:'&#128058;',b:'#181820',g:'#b070e0'}];
@@ -248,9 +247,15 @@ async function doExport(){const p1=document.getElementById('exPw').value,p2=docu
 function openImportEncrypted(){document.getElementById('imF').value='';document.getElementById('imPw').value='';document.getElementById('imErr').classList.remove('show');openM('mImp');}
 async function doImport(){const f=document.getElementById('imF').files[0],pw=document.getElementById('imPw').value,err=document.getElementById('imErr');if(!f){showE(err,'Select a .jrnl file.');return;}if(!pw){showE(err,'Enter your passphrase.');return;}try{const {entries:imp}=await decD(await f.arrayBuffer(),pw);const ids=new Set(E.map(e=>e.id)),nw=imp.filter(e=>!ids.has(e.id));E=[...nw,...E];saveD();renderList();closeM('mImp');toast('Imported '+nw.length+' entr'+(nw.length===1?'y':'ies')+'!');}catch{showE(err,'Wrong passphrase or corrupted file.');}}
 
+const THEME_META={"ember": ["🌙", "Ember"], "harvest": ["☀️", "Harvest"], "ocean": ["🌊", "Ocean"], "midnight": ["✨", "Midnight"], "forest": ["🌿", "Forest"], "rosewood": ["🌸", "Rosewood"], "slate": ["🪨", "Slate"], "dusk": ["🌆", "Dusk"]};
 let theme=localStorage.getItem('ft')||'ember';
 function applyTheme(t,anim,x,y){
-  const doSwap=()=>{document.documentElement.setAttribute('data-theme',t==='harvest'?'harvest':'');utb(t);theme=t;localStorage.setItem('ft',t);};
+  closeAllPops();
+  const doSwap=()=>{
+    document.documentElement.setAttribute('data-theme',t==='ember'?'':t);
+    theme=t;localStorage.setItem('ft',t);
+    utb(t);
+  };
   if(!anim){doSwap();return;}
   const bx=x??window.innerWidth/2,by=y??window.innerHeight/2;
   document.documentElement.style.setProperty('--tx',bx+'px');
@@ -258,14 +263,21 @@ function applyTheme(t,anim,x,y){
   if(document.startViewTransition){
     document.startViewTransition(doSwap);
   } else {
-    // fallback: instant swap with gentle fade via body
     document.body.style.transition='opacity .18s ease';
     document.body.style.opacity='0';
     setTimeout(()=>{doSwap();document.body.style.opacity='1';setTimeout(()=>document.body.style.transition='',200);},180);
   }
 }
-function utb(t){const b=document.getElementById('tbtn');if(b)b.innerHTML=t==='harvest'?'&#127761;':'&#127769;';}
-function toggleTheme(e){const r=document.getElementById('tbtn').getBoundingClientRect();applyTheme(theme==='ember'?'harvest':'ember',true,r.left+r.width/2,r.top+r.height/2);}
+function utb(t){
+  const meta=THEME_META[t]||THEME_META['ember'];
+  const icon=document.getElementById('tbtn-icon'),lbl=document.getElementById('tbtn-lbl');
+  if(icon) icon.textContent=meta[0];
+  if(lbl)  lbl.textContent=meta[1];
+  document.querySelectorAll('.th-opt').forEach(o=>o.classList.toggle('sel',o.id==='th-'+t));
+}
+function toggleTheme(){}  // kept for compat, now unused
+// Apply saved theme on load
+(()=>{ applyTheme(theme,false); })();
 
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
@@ -659,7 +671,6 @@ function szUpdateUI(px){
   document.getElementById('btn-size').textContent=px+'px';
   document.getElementById('sz-slider').value=px;
   document.getElementById('sz-input').value=px;
-  updatePageLines(px);
   document.querySelectorAll('.sz-preset').forEach(b=>{
     b.classList.toggle('active',parseInt(b.textContent)===px);
   });
@@ -672,7 +683,6 @@ function szSliderMove(v){
 function szSliderCommit(v){
   const px=Math.min(72,Math.max(8,parseInt(v)));
   szUpdateUI(px);
-  restoreSelection();
   applyFontSize(px);
 }
 // Typing in the number input
@@ -686,25 +696,26 @@ function szInputChange(v){
 }
 // Preset click
 function setSzPreset(px){
-  saveSelection();
   szUpdateUI(px);
   closeAllPops();
-  restoreSelection();
   applyFontSize(px);
 }
 // Commit from Enter key in input
 function szCommit(px){
   px=Math.min(72,Math.max(8,px||8));
-  saveSelection();
   szUpdateUI(px);
-  restoreSelection();
   applyFontSize(px);
 }
 function applyFontSize(px){
   const el=document.getElementById('eBody');
-  el.focus();
+  // Focus stays in eBody because all toolbar buttons use event.preventDefault()
+  // on mousedown — so window.getSelection() still holds the real cursor/selection
   const sel=window.getSelection();
-  if(sel&&!sel.isCollapsed&&sel.toString().trim()){
+  const hasSelection=sel&&!sel.isCollapsed&&sel.toString().trim()&&
+    el.contains(sel.anchorNode);
+
+  if(hasSelection){
+    // Wrap selected text in a sized span
     const range=sel.getRangeAt(0);
     const frag=range.extractContents();
     const sp=document.createElement('span');
@@ -715,22 +726,22 @@ function applyFontSize(px){
     const r=document.createRange();
     r.selectNodeContents(sp);
     sel.addRange(r);
-  } else {
-    // no selection — insert carrier span so next keystrokes use this size
+  } else if(sel&&sel.rangeCount&&el.contains(sel.anchorNode)){
+    // No selection — insert a sized carrier span at the cursor.
+    // Subsequent typing inside it inherits the size.
+    const range=sel.getRangeAt(0).cloneRange();
+    range.collapse(true);
     const sp=document.createElement('span');
     sp.style.fontSize=px+'px';
-    sp.textContent='\u200B';
-    if(sel&&sel.rangeCount){
-      const r=sel.getRangeAt(0);
-      r.collapse(true);
-      r.insertNode(sp);
-      r.setStartAfter(sp);r.setEndAfter(sp);
-      sel.removeAllRanges();sel.addRange(r);
-    } else {
-      el.appendChild(sp);
-    }
+    sp.textContent='​'; // zero-width space as anchor
+    range.insertNode(sp);
+    // Put cursor after the ZWS, inside the span
+    const r=document.createRange();
+    r.setStart(sp.firstChild,1);
+    r.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r);
   }
-  updatePageLines(px);
   onEdit();
 }
 // ── Mood tracker ──────────────────────────────────────────────────────
@@ -763,7 +774,6 @@ function renderMoodBar(mood){
 
 
 
-applyTheme(theme,false);
 renderProfiles();
 
 // ── PLAIN TEXT EXPORT ────────────────────────────────────────────────
@@ -1096,13 +1106,8 @@ function setPageStyle(style){
 
 
 // ── Page line/dot spacing synced to font size ────────────────────────
-function updatePageLines(px){
-  const lineH = (px || 16) * 1.9;          // line-height:1.9
-  const dotS  = Math.max(16, Math.round(lineH / 2) * 2); // nearest even px
-  const root  = document.documentElement;
-  root.style.setProperty('--line-h', lineH + 'px');
-  root.style.setProperty('--dot-s',  dotS  + 'px');
-}
-// Call on load with default size
-updatePageLines(16);
-
+// Ruled line spacing is fixed — set once, never changes
+(()=>{
+  document.documentElement.style.setProperty('--line-h','30.4px');
+  document.documentElement.style.setProperty('--dot-s','26px');
+})();

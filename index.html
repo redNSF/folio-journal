@@ -36,7 +36,22 @@
     <div class="tbl"><span class="wm">&#127810; Folio</span><span class="tg">your private journal</span></div>
     <div class="tba">
       <span class="sind" id="si1"></span>
-      <button class="btn bg bs" id="tbtn" onclick="toggleTheme()" style="font-size:1.05rem;padding:6px 10px">&#127769;</button>
+      <div class="tb-pop-wrap">
+          <button class="tb-btn" onmousedown="event.preventDefault()" onclick="togglePop('pop-theme')" id="tbtn" style="font-size:.82rem;padding:5px 9px"><span class="btn-page-inner"><span id="tbtn-icon">🌙</span><span class="btn-page-lbl" id="tbtn-lbl">Ember</span></span></button>
+          <div class="tb-pop" id="pop-theme">
+            <div class="pop-label">Theme</div>
+            <div class="th-grid">
+      <div class="th-opt" id="th-ember" onclick="applyTheme('ember',true)" style="--swatch-bg:#150d07;--swatch-ac:#c86010"><span class="th-swatch"></span><span class="th-label">🌙 Ember</span></div>
+      <div class="th-opt" id="th-harvest" onclick="applyTheme('harvest',true)" style="--swatch-bg:#fdf6ee;--swatch-ac:#c85000"><span class="th-swatch"></span><span class="th-label">☀️ Harvest</span></div>
+      <div class="th-opt" id="th-ocean" onclick="applyTheme('ocean',true)" style="--swatch-bg:#020d18;--swatch-ac:#00aab8"><span class="th-swatch"></span><span class="th-label">🌊 Ocean</span></div>
+      <div class="th-opt" id="th-midnight" onclick="applyTheme('midnight',true)" style="--swatch-bg:#000005;--swatch-ac:#8890e0"><span class="th-swatch"></span><span class="th-label">✨ Midnight</span></div>
+      <div class="th-opt" id="th-forest" onclick="applyTheme('forest',true)" style="--swatch-bg:#020a04;--swatch-ac:#4a9e50"><span class="th-swatch"></span><span class="th-label">🌿 Forest</span></div>
+      <div class="th-opt" id="th-rosewood" onclick="applyTheme('rosewood',true)" style="--swatch-bg:#0e0508;--swatch-ac:#d06878"><span class="th-swatch"></span><span class="th-label">🌸 Rosewood</span></div>
+      <div class="th-opt" id="th-slate" onclick="applyTheme('slate',true)" style="--swatch-bg:#e8ebf0;--swatch-ac:#3050a0"><span class="th-swatch"></span><span class="th-label">🪨 Slate</span></div>
+      <div class="th-opt" id="th-dusk" onclick="applyTheme('dusk',true)" style="--swatch-bg:#0c0612;--swatch-ac:#e06820"><span class="th-swatch"></span><span class="th-label">🌆 Dusk</span></div>
+            </div>
+          </div>
+        </div>
       <button class="btn bg bs" onclick="openM('mImpFmt')">&#8679; Import</button>
       <button class="btn bg bs" onclick="if(!E.length){toast('No entries to export.',true)}else{openM('mExpFmt')}">&#8681; Export</button>
       <button class="btn bp bs" onclick="newEntry()">&#xFF0B; New Entry</button>
@@ -80,27 +95,27 @@
         <button class="tb-btn" onclick="fmtBlock('h1')" title="Heading 1" style="font-size:.78rem;font-weight:700;letter-spacing:-.01em">H1</button>
         <button class="tb-btn" onclick="fmtBlock('h2')" title="Heading 2" style="font-size:.78rem;font-weight:700;letter-spacing:-.01em">H2</button>
         <div class="tb-pop-wrap">
-          <button class="tb-btn" onclick="togglePop('pop-size')" title="Font size" style="font-size:.78rem;min-width:32px;justify-content:center;font-weight:600" id="btn-size">16px</button>
+          <button class="tb-btn" onmousedown="event.preventDefault()" onclick="togglePop('pop-size')" title="Font size" style="font-size:.78rem;min-width:32px;justify-content:center;font-weight:600" id="btn-size">16px</button>
           <div class="tb-pop" id="pop-size">
             <div class="pop-label" style="margin-bottom:10px">Font Size</div>
             <div class="sz-top-row">
               <input type="range" class="sz-slider" id="sz-slider" min="8" max="72" value="16"
+                onmousedown="saveSelection()"
                 oninput="szSliderMove(this.value)"
-                onchange="szSliderCommit(this.value)"
-                onmousedown="saveSelection()" />
+                onchange="szSliderCommit(this.value)" />
               <input type="number" class="sz-input" id="sz-input" min="8" max="72" value="16"
                 oninput="szInputChange(this.value)"
                 onkeydown="if(event.key==='Enter'){szCommit(parseInt(this.value));closeAllPops();}" />
               <span class="sz-unit">px</span>
             </div>
             <div class="sz-presets">
-              <span class="sz-preset" onclick="setSzPreset(11)">11</span>
-              <span class="sz-preset" onclick="setSzPreset(13)">13</span>
-              <span class="sz-preset active" onclick="setSzPreset(16)">16</span>
-              <span class="sz-preset" onclick="setSzPreset(20)">20</span>
-              <span class="sz-preset" onclick="setSzPreset(24)">24</span>
-              <span class="sz-preset" onclick="setSzPreset(32)">32</span>
-              <span class="sz-preset" onclick="setSzPreset(48)">48</span>
+              <span class="sz-preset" onmousedown="event.preventDefault()" onclick="setSzPreset(11)">11</span>
+              <span class="sz-preset" onmousedown="event.preventDefault()" onclick="setSzPreset(13)">13</span>
+              <span class="sz-preset active" onmousedown="event.preventDefault()" onclick="setSzPreset(16)">16</span>
+              <span class="sz-preset" onmousedown="event.preventDefault()" onclick="setSzPreset(20)">20</span>
+              <span class="sz-preset" onmousedown="event.preventDefault()" onclick="setSzPreset(24)">24</span>
+              <span class="sz-preset" onmousedown="event.preventDefault()" onclick="setSzPreset(32)">32</span>
+              <span class="sz-preset" onmousedown="event.preventDefault()" onclick="setSzPreset(48)">48</span>
             </div>
           </div>
         </div>
@@ -310,7 +325,6 @@
 <div class="tw" id="tw"></div>
 
 <div id="day-tip"></div>
-<script src="script.js"></script>
 
 
 <!-- Vent Duration Sheet -->
@@ -412,5 +426,6 @@
 }
 #ventPage.burning>*{animation:vburn 1.4s ease-in forwards}
 </style>
+<script src="script.js"></script>
 </body>
 </html>
