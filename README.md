@@ -34,10 +34,10 @@ Folio is a single-page application built with vanilla HTML, CSS, and JavaScript 
 
 | Stat | Value |
 |------|-------|
-| Total lines of code | ~1,950 |
-| JavaScript | ~1,100 lines |
-| CSS | ~430 lines |
-| HTML | ~420 lines |
+| Total lines of code | ~2,050 |
+| JavaScript | ~1,115 lines |
+| CSS | ~505 lines |
+| HTML | ~430 lines |
 | External dependencies | **None** |
 | Server required | **No** |
 | Internet required | **No** |
@@ -64,9 +64,9 @@ That's it. No installation, no build step, no login server.
 
 ```
 folio/
-├── index.html   — Structure and markup (~29 KB)
-├── style.css    — All styles and animations (~32 KB)
-└── script.js     — All application logic (~52 KB)
+├── index.html   — Structure and markup (~430 lines)
+├── style.css    — All styles and animations (~505 lines)
+└── script.js    — All application logic (~1,115 lines)
 ```
 
 All three files must stay in the same directory for relative path references to resolve.
@@ -81,7 +81,7 @@ Folio supports multiple fully isolated accounts on the same device — useful fo
 
 - Each account has a **display name**, a **password**, and a unique **emoji avatar** with a matching background color
 - Accounts are listed on a profile picker screen on first load
-- Profile cards **glow in the emoji's own color** when hovered
+- Profile cards **glow in the emoji's own color** when hovered — each avatar has a distinct glow tint (fox, owl, maple, moon, bear, autumn, leaf, star, peacock)
 - Passwords are hashed with **PBKDF2 + SHA-256** before being stored — the plaintext password is never saved
 - Each account's entries are stored independently under a unique key
 
@@ -98,9 +98,9 @@ The editor mirrors the feel of a native writing app:
 - **Text color** — 12 preset swatches plus full custom color picker
 - **Highlight color** — 8 highlight options including a clear option
 - **Font family** — detects your locally installed fonts via `queryLocalFonts()` API (Chrome 103+) with a canvas-based fallback that tests ~70 common fonts. Fonts are listed with live previews in their own typeface
-- **Font size** — smooth slider (8–72px), number input for exact values, and quick-access preset buttons. Size applies to selected text or sets the next typing size
+- **Font size** — smooth slider (8–72px), number input for exact values, and quick-access preset buttons
 
-The toolbar autohides inactive controls, shows active state on bold/italic/underline/strike, and updates the font button label to reflect the current cursor position's font.
+The toolbar shows active state on bold/italic/underline/strike and updates the font button label to reflect the current cursor position's font. All toolbar buttons use `preventDefault` on `mousedown` so focus never leaves the editor while changing formatting.
 
 ---
 
@@ -114,7 +114,7 @@ The font size panel in the formatting toolbar provides three ways to set size:
 | **Number input** | Type any value 8–72, press Enter to apply |
 | **Presets** | One-click: 11, 13, 16, 20, 24, 32, 48 |
 
-The toolbar button label updates to show the current size (e.g. `16px`). Font size applies to the selected text as a `<span>` wrapper, or sets a zero-width carrier span at the cursor position for subsequent typing.
+Font size applies to **selected text only** as a `<span>` wrapper. With no selection, a sized carrier span is inserted at the cursor so the next keystrokes type at that size — without changing any other text in the entry. The toolbar size button label always reflects the chosen size (e.g. `16px`).
 
 ---
 
@@ -144,15 +144,15 @@ A row of 10 mood buttons sits above each entry's title:
 
 ### Page Styles
 
-Accessible from the **📄 / Ruled / Dotted** button in the formatting toolbar. Three canvas styles:
+Accessible from the **📄** button in the formatting toolbar. The button displays the current style name underneath the icon for at-a-glance navigation. Three canvas styles:
 
 **Fresh** — Clean, unlined paper. The default.
 
-**Ruled** — Horizontal lines spaced precisely to `font-size × 1.9` (the editor's line-height). Lines stay in perfect alignment with every text row. The spacing updates live when you change the font size. A faint vertical margin line runs down the left edge.
+**Ruled** — Horizontal lines at a fixed spacing with a faint vertical margin line running down the left edge. Line color adapts to the active theme.
 
-**Dotted** — Dot grid pattern where the dot spacing equals half the line height, keeping dots visually centered between rows of text. Also updates live with font size changes.
+**Dotted** — Dot grid pattern. Dot color adapts to the active theme.
 
-Both Ruled and Dotted adapt their tint color to the active theme (warm amber for Ember, muted brown for Harvest). The toolbar button label shows the current style name for at-a-glance navigation.
+Selection persists across sessions. The toolbar button label updates live to show **Fresh**, **Ruled**, or **Dotted**.
 
 ---
 
@@ -177,29 +177,39 @@ Clicking the pill opens a tooltip panel with full stats and a **28-day heatmap c
 
 ### Vent Mode
 
-A self-contained, self-destructing writing space for brain dumps, emotional releases, or anything you need to get out without keeping a record.
+A self-contained, self-destructing writing space for brain dumps, emotional releases, or anything you need to get out without keeping a record. Accessed via the **🔥 Vent** button in the top bar.
 
 **Starting a session:**
-1. Click the **🔥 Vent** button in the top bar
-2. A bottom sheet slides up — choose your self-destruct timer:
-   - 5 minutes
-   - 10 minutes
-   - 15 minutes
-   - 30 minutes
-   - 1 hour
-   - 24 hours
-3. Click **🔥 Start venting**
+
+A bottom sheet slides up with a spring animation. Choose your self-destruct timer:
+
+| Option | Option |
+|--------|--------|
+| 5 minutes | 10 minutes |
+| 15 minutes | 30 minutes |
+| 1 hour | 24 hours |
+
+Click **🔥 Start venting** — the button glows with a pulsing crimson aura and lifts on hover.
 
 **The editor:**
-The vent editor is a full-screen page styled identically to a normal journal entry, but tinted deep crimson-amber so the context is immediately clear. It has:
 
-- A live countdown timer that turns red and pulses in the final 60 seconds
-- A **← Back** button that saves progress and exits without destroying (timer keeps running)
-- A word count
+The vent editor slides in from the right as a full-screen page styled identically to a normal journal entry — same title input, same body area — but tinted deep crimson-amber so the context is immediately clear. The topbar includes:
+
+- A live countdown timer (switches to `MM:SS` under one hour, turns red and pulses in the final 60 seconds)
+- A **← Back** button that saves progress and exits without destroying (timer keeps running in background)
+- Word count display
 - A **🔥 Burn & close** button that shakes and vibrates on hover
 
 **Destruction:**
-When the timer hits zero — or you click Burn & close — a canvas particle fire animation erupts across the screen. Flame particles rise from the bottom, embers shoot upward, a heat glow grows from the base. The content blurs, brightens, and turns to sepia like paper catching light. After ~1.4 seconds everything clears from `localStorage`. Gone permanently.
+
+When the timer hits zero — or you click Burn & close — a full-screen canvas particle fire animation erupts:
+
+- Flame petals rise from the bottom upward in a wave
+- Tiny ember sparks shoot upward and fade
+- A heat glow grows from the base as fire spreads
+- The page content simultaneously blurs, brightens, and turns sepia like burning paper
+
+After ~1.4 seconds everything is cleared from `localStorage`. Gone permanently. A toast notification confirms it.
 
 If you close the app mid-session, re-opening and clicking Vent resumes the active session with the timer still counting down. There is no way to recover a burned vent.
 
@@ -207,13 +217,20 @@ If you close the app mid-session, re-opening and clicking Vent resumes the activ
 
 ### Themes
 
-Two themes, toggled with the 🌙 button in the top bar:
+8 themes accessible from the theme button in the top bar. The button shows the current theme icon and name underneath it. Clicking opens a **4×2 theme picker grid** with color swatch previews (left half = background, right half = accent color). Theme transitions use the View Transitions API for an animated radial crossfade from the click point.
 
-**Ember** *(default)* — Dark mode. Deep charcoal backgrounds, amber and gold accents, warm cream text. Inspired by autumn evenings and candlelight.
+| Theme | Character |
+|-------|-----------|
+| 🌙 **Ember** | Dark warm amber — autumn evenings, candlelight *(default)* |
+| ☀️ **Harvest** | Light cream and ivory — warm daytime paper *(light)* |
+| 🌊 **Ocean** | Deep midnight sea, bioluminescent teal accents |
+| ✨ **Midnight** | Near-absolute black, cool silver-blue stars |
+| 🌿 **Forest** | Dark pine black-green, soft moss glow |
+| 🌸 **Rosewood** | Aged dark wood, warm rose-gold accents |
+| 🪨 **Slate** | Overcast cool grey with ice-blue accents *(light)* |
+| 🌆 **Dusk** | Deep violet-black sky, burnt orange horizon |
 
-**Harvest** *(light)* — Light mode. Warm cream and ivory backgrounds, richer amber accents. Designed for daytime writing.
-
-Theme transitions use the View Transitions API when available for a smooth crossfade. The selected theme persists across sessions.
+Each theme defines a full token set covering backgrounds, surfaces, borders, accents, text colors, editor gradient blobs, and toolbar blur tint. Every UI element — login screen, sidebar, editor, modals, tooltips, and vent mode — adapts fully to the active theme. Selection persists across sessions.
 
 ---
 
@@ -222,7 +239,7 @@ Theme transitions use the View Transitions API when available for a smooth cross
 **Export:**
 
 - **Encrypted (.jrnl)** — AES-256-GCM encrypted binary file. Only openable in Folio with the correct passphrase. Safe to store in cloud services or share.
-- **Plain Text (.txt)** — Human-readable export with optional dates, entry titles, and separator lines between entries. HTML tags are stripped.
+- **Plain Text (.txt)** — Human-readable export with optional dates, entry titles, and separator lines. HTML tags are stripped.
 
 **Import:**
 
@@ -236,8 +253,8 @@ Theme transitions use the View Transitions API when available for a smooth cross
 | Concern | How Folio handles it |
 |---------|----------------------|
 | **Password storage** | PBKDF2-SHA256 hash only — plaintext never stored |
-| **Entry encryption at rest** | Entries are stored as plain JSON in `localStorage`. Use encrypted export for sensitive backups |
-| **Encrypted export** | AES-256-GCM with a random 96-bit IV per export, key derived via PBKDF2 (100,000 iterations, SHA-256) |
+| **Entry encryption at rest** | Entries stored as plain JSON in `localStorage`. Use encrypted export for sensitive backups |
+| **Encrypted export** | AES-256-GCM with a random 96-bit IV per export, key derived via PBKDF2 (250,000 iterations, SHA-256) |
 | **Network requests** | None — Folio makes zero network requests |
 | **Analytics / tracking** | None |
 | **Ads** | None |
@@ -252,24 +269,28 @@ All cryptographic operations use the browser's native **Web Crypto API** (`windo
 
 ## Design System
 
-Folio uses a CSS custom property-based design token system:
+Folio uses a CSS custom property-based design token system. Every theme defines the full set:
 
 ```css
-/* Ember theme tokens (selection) */
---bg:       #150d07    /* Page background */
---surface:  #1f1108    /* Elevated surface */
---card:     #2a1a0a    /* Card background */
---amber:    #c86010    /* Primary accent */
---gold:     #d4a030    /* Secondary accent */
---cream:    #f0e0c8    /* Primary text */
---muted:    #9a7858    /* Secondary text */
---faint:    #6a5040    /* Placeholder / disabled */
---border:   rgba(200,140,60,.2)
+--bg          /* Page background */
+--surface     /* Elevated surface (sidebar, topbar) */
+--card        /* Card / modal background */
+--card-hover  /* Card hover state */
+--border      /* Border color */
+--bs          /* Subtle border / separator */
+--gold        /* Secondary accent */
+--amber       /* Primary accent (buttons, highlights) */
+--orange      /* Warm accent variant */
+--cream       /* Primary text */
+--muted       /* Secondary text */
+--faint       /* Placeholder / disabled */
+--tbg         /* Toolbar backdrop blur tint */
+--eg1, --eg2  /* Editor background gradient blobs */
 ```
 
 Typography uses **Patrick Hand** (loaded from Google Fonts) as the sole typeface across the entire UI — headings, body, labels, and buttons.
 
-Animations throughout the app target the GPU-composited properties (`transform`, `opacity`, `filter`) to stay off the main thread. The sidebar collapse uses a `requestAnimationFrame` lerp loop for spring-like smoothness.
+Animations target GPU-composited properties (`transform`, `opacity`, `filter`) throughout. The sidebar collapse uses a `requestAnimationFrame` lerp loop for spring-like motion. Theme transitions use the native View Transitions API with a radial clip-path reveal from the click origin.
 
 ---
 
@@ -277,7 +298,7 @@ Animations throughout the app target the GPU-composited properties (`transform`,
 
 | Shortcut | Action |
 |----------|--------|
-| `Escape` | Close any open modal, pop, or overlay |
+| `Escape` | Close any open modal, pop, sheet, or overlay |
 | `Ctrl/Cmd + B` | Bold |
 | `Ctrl/Cmd + I` | Italic |
 | `Ctrl/Cmd + U` | Underline |
@@ -291,7 +312,7 @@ Animations throughout the app target the GPU-composited properties (`transform`,
 | Core app | Any modern browser (Chrome 90+, Firefox 90+, Safari 15+, Edge 90+) |
 | AES-256 encryption | Web Crypto API — all modern browsers |
 | Local font detection | `queryLocalFonts()` — Chrome 103+ only; canvas fallback for all others |
-| View Transitions (theme switch) | Chrome 111+; graceful fallback on unsupported browsers |
+| View Transitions (theme switch) | Chrome 111+; graceful opacity-fade fallback on unsupported browsers |
 | Canvas fire animation | All modern browsers |
 
 ---
