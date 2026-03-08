@@ -61,14 +61,16 @@
       <button class="btn bp bs" onclick="newEntry()">&#xFF0B; New Entry</button>
       <button class="btn bv bs" onclick="openVentSheet()" title="Vent Mode — self-destructs">&#128293; Vent</button>
       <div class="streak-pill" id="streakPill" onclick="toggleStreakTip()"><span class="streak-flame">&#128293;</span><span class="streak-num" id="streakNum">0</span><span class="streak-label">day streak</span><div class="streak-tip" id="streakTip"></div></div><div class="up" id="upill" onclick="toggleDrop()">
-        <div class="upav" id="pilav"></div>
         <span class="upn" id="piln"></span>
         <span style="color:var(--faint);font-size:.7rem;transition:none">&#9662;</span>
+        <div class="upav" id="pilav"></div>
         <div class="udrop" id="udrop">
           <div class="ddh"><div class="ddn" id="ddn"></div><div class="dds2" id="dds"></div></div>
           <div class="ddsep"></div>
           <button class="dd-item" onclick="openCPw()">&#128273; Change Password</button>
           <button class="dd-item" onclick="switchAccount()">&#128100; Switch Account</button>
+          <div class="ddsep"></div>
+          <a class="dd-item" href="https://github.com/redNSF/folio-journal" target="_blank" rel="noopener" style="text-decoration:none">&#129716; About Folio</a>
           <div class="ddsep"></div>
           <button class="dd-item danger" onclick="openDelA()">&#128465; Delete Account</button>
         </div>
